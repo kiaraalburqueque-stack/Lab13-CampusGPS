@@ -44,6 +44,7 @@ com.alburquequearzapalo.campusgps/
     ├── MapaUbicacion.kt            GoogleMap, cámara y marcadores
     ├── ListaLugares.kt             LazyColumn de tarjetas
     ├── MensajeError.kt             recuadro de error con su acción
+    ├── FiltroCategorias.kt         chips de categoría (Fase 2)
     └── theme/Theme.kt              tema Material 3
 ```
 
@@ -156,6 +157,16 @@ Desde Android 11, después de dos negaciones el sistema ya no vuelve a mostrar e
 9. `feat(errores): maneja permiso denegado, GPS apagado y sin Play Services`
 10. `docs: agrega README con estructura y capturas`
 
+## Fase 2 – Mejoras con IA (rama `mejora-ia`)
+
+| Mejora | Qué hace | Capas que cambian |
+|---|---|---|
+| Punto azul nativo | Activa `isMyLocationEnabled` y el botón de mi ubicación del mapa solo si el permiso fue concedido | View |
+| Filtrar por categoría | Chips *Todos / Estudio / Comida / Eventos / Servicios*: filtran el mapa y la lista; el más cercano se calcula sobre lo visible | ViewModel + View (`FiltroCategorias.kt`) |
+| Seguimiento en vivo | `requestLocationUpdates` convertido en `Flow` con `callbackFlow`, botón *Iniciar/Detener seguimiento* | Repository + ViewModel + View |
+
+Pruebas unitarias en esta rama: `FormatoTest` (2) y `MapaViewModelTest` (8, con un repositorio falso). El análisis de los prompts está en [`PROMPTS.md`](PROMPTS.md).
+
 ## Uso de IA
 
-El docente autorizó usar IA también en la Fase 1. El código de este repositorio se desarrolló con ayuda de **Claude Code** (asistente de IA de Anthropic), siguiendo los contratos del PDF del laboratorio. No se tuvo el proyecto base del docente, así que el commit 1 reconstruye el "ejemplo resuelto" de la sección 8 del PDF. El detalle de los prompts y de las decisiones está en `PROMPTS.md` (rama `mejora-ia`).
+El docente autorizó usar IA también en la Fase 1. El código de este repositorio se desarrolló con ayuda de **Claude Code** (asistente de IA de Anthropic), siguiendo los contratos del PDF del laboratorio. No se tuvo el proyecto base del docente, así que el commit 1 reconstruye el "ejemplo resuelto" de la sección 8 del PDF. El detalle de los prompts y de las decisiones está en [`PROMPTS.md`](PROMPTS.md).
