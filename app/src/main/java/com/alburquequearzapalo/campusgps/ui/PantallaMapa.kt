@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -75,6 +76,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 estado = estado,
                 lugares = lugares,
                 seleccionado = seleccionado,
+                onSeleccionar = { vm.seleccionar(it) },
                 modifier = Modifier.fillMaxWidth().weight(1f)
             )
             Column(
@@ -88,13 +90,20 @@ fun PantallaMapa(vm: MapaViewModel) {
                 when (val e = estado) {
                     UbicacionUi.Inicial -> Text("Pulsa el botón para empezar")
                     UbicacionUi.Buscando -> Text("Buscando…")
-                    is UbicacionUi.Lista -> {
-                        Text("Latitud: ${e.posicion.latitud}")
-                        Text("Longitud: ${e.posicion.longitud}")
-                    }
+                    is UbicacionUi.Lista -> Text(
+                        "Latitud: ${e.posicion.latitud}   Longitud: ${e.posicion.longitud}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
                     is UbicacionUi.Error -> Text(e.mensaje, color = MaterialTheme.colorScheme.error)
                 }
             }
+            // Lista debajo del mapa, con altura fija
+            ListaLugares(
+                lugares = lugares,
+                seleccionado = seleccionado,
+                onClick = { vm.seleccionar(it) },
+                modifier = Modifier.fillMaxWidth().height(220.dp)
+            )
         }
     }
 }
