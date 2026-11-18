@@ -46,6 +46,10 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        // En pruebas JVM, las clases de Android (Log, Location) devuelven valores por defecto
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -65,6 +69,7 @@ dependencies {
     implementation(libs.maps.compose)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     debugImplementation(libs.androidx.compose.ui.tooling)

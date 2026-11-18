@@ -48,7 +48,8 @@ private val PERMISOS = arrayOf(
 @Composable
 fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
-    val lugares by vm.lugares.collectAsState()
+    val lugares by vm.lugaresVisibles.collectAsState()
+    val categoria by vm.categoria.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
     val contexto = LocalContext.current
@@ -147,6 +148,12 @@ fun PantallaMapa(vm: MapaViewModel) {
                     is UbicacionUi.Error -> Unit // se dibuja arriba con MensajeError
                 }
             }
+            // Mejora IA: chips para filtrar por categoría (mapa y lista)
+            FiltroCategorias(
+                categorias = vm.categorias,
+                seleccionada = categoria,
+                onElegir = { vm.filtrar(it) }
+            )
             // Lista debajo del mapa, con altura fija
             ListaLugares(
                 lugares = lugares,
