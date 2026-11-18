@@ -2,6 +2,8 @@ package com.alburquequearzapalo.campusgps.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import androidx.compose.ui.Modifier
 import com.alburquequearzapalo.campusgps.model.LugarConDistancia
 import com.alburquequearzapalo.campusgps.model.UbicacionUi
@@ -42,6 +44,18 @@ fun MapaUbicacion(
                 title = "Estás aquí"
             )
         }
-        // TODO 3 (Paso 4): un Marker por cada lugar
+        // Un marcador azul por lugar; key(id) evita que Compose confunda marcadores al reordenar
+        lugares.forEach { item ->
+            key(item.lugar.id) {
+                Marker(
+                    state = rememberUpdatedMarkerState(
+                        position = LatLng(item.lugar.latitud, item.lugar.longitud)
+                    ),
+                    title = item.lugar.nombre,
+                    snippet = item.lugar.categoria,
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                )
+            }
+        }
     }
 }
