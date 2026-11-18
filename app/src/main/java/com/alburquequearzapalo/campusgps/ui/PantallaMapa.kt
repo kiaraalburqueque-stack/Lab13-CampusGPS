@@ -1,6 +1,10 @@
 package com.alburquequearzapalo.campusgps.ui
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -73,6 +77,23 @@ fun PantallaMapa(vm: MapaViewModel) {
             )
         }
     ) { padding ->
+        val error = estado as? UbicacionUi.Error
+        if (error != null) {
+            // Pantalla de error: botón principal, mensaje y la acción que corresponda
+            Column(
+                modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Button(onClick = { alPulsar() }) { Text("Obtener mi ubicación") }
+                MensajeError(
+                    error = error,
+                    onAbrirAjustes = { abrirAjustesApp(contexto) },
+                    onReintentar = { alPulsar() }
+                )
+            }
+            return@Scaffold
+        }
         Column(
             modifier = Modifier.fillMaxSize().padding(padding),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -117,7 +138,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                         "Latitud: ${e.posicion.latitud}   Longitud: ${e.posicion.longitud}",
                         style = MaterialTheme.typography.bodySmall
                     )
-                    is UbicacionUi.Error -> Text(e.mensaje, color = MaterialTheme.colorScheme.error)
+                    is UbicacionUi.Error -> Unit // se dibuja arriba con MensajeError
                 }
             }
             // Lista debajo del mapa, con altura fija
@@ -130,4 +151,13 @@ fun PantallaMapa(vm: MapaViewModel) {
             )
         }
     }
+}
+
+/** Abre la pantalla de información de la app, donde el usuario puede conceder el permiso. */
+private fun abrirAjustesApp(contexto: Context) {
+    val intent = Intent(
+        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+        Uri.fromParts("package", contexto.packageName, null)
+    ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    contexto.startActivity(intent)
 }
