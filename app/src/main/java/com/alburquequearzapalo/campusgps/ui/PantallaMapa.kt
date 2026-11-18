@@ -1,5 +1,11 @@
 package com.alburquequearzapalo.campusgps.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,10 +27,30 @@ import androidx.compose.ui.unit.dp
 import com.alburquequearzapalo.campusgps.model.UbicacionUi
 import com.alburquequearzapalo.campusgps.viewmodel.MapaViewModel
 
+private val PERMISOS = arrayOf(
+    Manifest.permission.ACCESS_FINE_LOCATION,
+    Manifest.permission.ACCESS_COARSE_LOCATION
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
+    val contexto = LocalContext.current
+
+    // El cuadro de permiso lo dibuja Android; aquí solo recibimos la respuesta
+    val lanzador = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { resultado ->
+        if (resultado.values.any { it }) vm.buscar() else vm.permisoDenegado()
+    }
+
+    fun alPulsar() {
+        val tienePermiso = PERMISOS.any {
+            ContextCompat.checkSelfPermission(contexto, it) == PackageManager.PERMISSION_GRANTED
+        }
+        if (tienePermiso) vm.buscar() else lanzador.launch(PERMISOS)
+    }
 
     Scaffold(
         topBar = {
@@ -42,7 +68,7 @@ fun PantallaMapa(vm: MapaViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Button(onClick = { vm.buscar() }) {
+            Button(onClick = { alPulsar() }, enabled = estado !is UbicacionUi.Buscando) {
                 Text("Obtener mi ubicación")
             }
             when (val e = estado) {
