@@ -27,6 +27,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
@@ -59,12 +60,16 @@ fun PantallaMapa(vm: MapaViewModel) {
         if (resultado.values.any { it }) vm.buscar() else vm.permisoDenegado()
     }
 
-    fun alPulsar() {
-        val tienePermiso = PERMISOS.any {
-            ContextCompat.checkSelfPermission(contexto, it) == PackageManager.PERMISSION_GRANTED
-        }
-        if (tienePermiso) vm.buscar() else lanzador.launch(PERMISOS)
+    fun permisoConcedido() = PERMISOS.any {
+        ContextCompat.checkSelfPermission(contexto, it) == PackageManager.PERMISSION_GRANTED
     }
+
+    fun alPulsar() {
+        if (permisoConcedido()) vm.buscar() else lanzador.launch(PERMISOS)
+    }
+
+    // Se vuelve a revisar cada vez que cambia el estado (por ejemplo, tras responder al permiso)
+    val tienePermiso = remember(estado) { permisoConcedido() }
 
     Scaffold(
         topBar = {
@@ -104,6 +109,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 lugares = lugares,
                 seleccionado = seleccionado,
                 masCercanoId = masCercano?.id,
+                tienePermiso = tienePermiso,
                 modifier = Modifier.fillMaxWidth().weight(1f)
             )
             Column(
