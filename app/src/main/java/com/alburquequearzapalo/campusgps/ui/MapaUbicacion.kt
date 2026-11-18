@@ -21,6 +21,8 @@ fun MapaUbicacion(
     estado: UbicacionUi,
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
+    pedidoEnfoque: Int,
+    masCercanoId: Int?,
     onSeleccionar: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -36,8 +38,8 @@ fun MapaUbicacion(
         }
     }
 
-    // Al seleccionar un lugar, la cámara viaja hasta él
-    LaunchedEffect(seleccionado) {
+    // Al seleccionar un lugar, la cámara viaja hasta él (también si se repite el mismo)
+    LaunchedEffect(pedidoEnfoque) {
         lugares.firstOrNull { it.lugar.id == seleccionado }?.let {
             camara.animate(CameraUpdateFactory.newLatLngZoom(LatLng(it.lugar.latitud, it.lugar.longitud), 17f))
         }
@@ -52,14 +54,14 @@ fun MapaUbicacion(
                 title = "Estás aquí"
             )
         }
-        // Un marcador azul por lugar; key(id) evita que Compose confunda marcadores al reordenar
+        // Un marcador por lugar; key(id) evita que Compose confunda marcadores al reordenar
         lugares.forEach { item ->
             key(item.lugar.id) {
                 val estadoMarcador = rememberUpdatedMarkerState(
                     position = LatLng(item.lugar.latitud, item.lugar.longitud)
                 )
                 // El lugar seleccionado muestra su nombre y categoría
-                LaunchedEffect(seleccionado) {
+                LaunchedEffect(pedidoEnfoque) {
                     if (seleccionado == item.lugar.id) estadoMarcador.showInfoWindow()
                 }
                 Marker(
@@ -72,7 +74,11 @@ fun MapaUbicacion(
                         onSeleccionar(item.lugar.id)
                         true
                     },
-                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                    // El más cercano en verde; los demás en azul
+                    icon = BitmapDescriptorFactory.defaultMarker(
+                        if (item.lugar.id == masCercanoId) BitmapDescriptorFactory.HUE_GREEN
+                        else BitmapDescriptorFactory.HUE_AZURE
+                    )
                 )
             }
         }
