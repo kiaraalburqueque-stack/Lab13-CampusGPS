@@ -1,11 +1,14 @@
 package com.alburquequearzapalo.campusgps.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alburquequearzapalo.campusgps.data.LugaresRepository
 import com.alburquequearzapalo.campusgps.data.UbicacionRepository
 import com.alburquequearzapalo.campusgps.model.LugarConDistancia
+import com.alburquequearzapalo.campusgps.model.Posicion
 import com.alburquequearzapalo.campusgps.model.UbicacionUi
+import com.alburquequearzapalo.campusgps.util.distanciaMetros
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,7 +36,7 @@ class MapaViewModel(
             ubicacionRepo.obtenerPosicion()
                 .onSuccess {
                     _estado.value = UbicacionUi.Lista(it)
-                    // TODO Paso 5: actualizarDistancias(it)
+                    actualizarDistancias(it)
                 }
                 .onFailure { _estado.value = UbicacionUi.Error(mensajeDe(it)) }
         }
@@ -45,6 +48,14 @@ class MapaViewModel(
 
     // TODO Paso 6: fun seleccionar(id: Int?)
     // TODO Paso 7: val masCercano: StateFlow<Lugar?>
+
+    /** Calcula la distancia a cada lugar, ordena de menor a mayor y publica la lista. */
+    private fun actualizarDistancias(pos: Posicion) {
+        _lugares.value = lugaresRepo.obtenerLugares()
+            .map { LugarConDistancia(it, distanciaMetros(pos, it)) }
+            .sortedBy { it.metros }
+        Log.d("MapaViewModel", "Lugares ordenados: " + _lugares.value.joinToString { "${it.lugar.nombre}=${it.metros}" })
+    }
 
     private fun mensajeDe(e: Throwable): String = when (e) {
         is SecurityException -> "Falta el permiso de ubicación"
