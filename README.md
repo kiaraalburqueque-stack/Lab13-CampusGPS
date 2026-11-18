@@ -93,38 +93,42 @@ Sin clave la app abre igual: la ubicación, las distancias y la lista funcionan,
    ```
 4. En un teléfono real se usa tu ubicación verdadera. Si no estás cerca de las coordenadas ficticias de Lima, las distancias saldrán en km, pero el orden y el lugar más cercano siguen calculándose bien.
 
-## Capturas (pendientes)
+## Capturas
 
-Se agregarán tomadas del emulador o teléfono real. No se usan imágenes inventadas.
+Tomadas en un teléfono Android real. La ubicación real está a unos 9 km de los lugares ficticios del laboratorio, por eso las distancias salen en km.
 
-| # | Pantalla | Archivo |
-|---|---|---|
-| 1 | Cuadro de permiso | `docs/capturas/01-permiso.png` *(pendiente)* |
-| 2 | Mapa con mi ubicación (*Estás aquí*) | `docs/capturas/02-mapa-ubicacion.png` *(pendiente)* |
-| 3 | Marcadores de los 5 lugares | `docs/capturas/03-marcadores.png` *(pendiente)* |
-| 4 | Lista ordenada por distancia | `docs/capturas/04-lista-ordenada.png` *(pendiente)* |
-| 5 | Estado de error (permiso denegado / GPS apagado) | `docs/capturas/05-error.png` *(pendiente)* |
+| 1. Cuadro de permiso | 2. Mapa con mi ubicación |
+|---|---|
+| <img src="docs/capturas/01-permiso.png" width="260"> | <img src="docs/capturas/02-mapa-ubicacion.png" width="260"> |
+
+| 3. Marcadores de los 5 lugares | 4. Lista ordenada por distancia |
+|---|---|
+| <img src="docs/capturas/03-marcadores.png" width="260"> | <img src="docs/capturas/04-lista-ordenada.png" width="260"> |
+
+**5. Estados de error:** permiso denegado (*Reintentar* y *Abrir ajustes*) y GPS apagado (*Reintentar*)
+
+<img src="docs/capturas/05-error.png" width="520">
 
 ## Pruebas
 
 **Pruebas unitarias (JUnit):** `FormatoTest` comprueba metros enteros y km con un decimal. Se ejecutan con `.\gradlew testDebugUnitTest`.
 
-**Pruebas de aceptación** (se marcan al ejecutarlas en el emulador o el teléfono):
+**Pruebas de aceptación** (en un teléfono Android real; ☑ = comprobada con captura o verificación del repositorio):
 
 | Prueba | Resultado esperado | OK |
 |---|---|---|
-| Abrir la app por primera vez y pulsar el botón | Aparece el cuadro de permiso | ☐ |
-| Aceptar el permiso | Se ven latitud, longitud y el marcador *Estás aquí* | ☐ |
-| Negar el permiso | Mensaje de error con *Abrir ajustes*, la app no se cierra | ☐ |
+| Abrir la app por primera vez y pulsar el botón | Aparece el cuadro de permiso | ☑ |
+| Aceptar el permiso | Se ven latitud, longitud y el marcador *Estás aquí* | ☑ |
+| Negar el permiso | Mensaje de error con *Reintentar* y *Abrir ajustes*, la app no se cierra | ☑ |
 | Ubicación en el punto base | Los 5 marcadores azules aparecen cerca de tu posición | ☐ |
-| Tocar un marcador | Se ve el nombre y la categoría del lugar | ☐ |
-| Lista de lugares | Ordenada de menor a mayor distancia, con m o km | ☐ |
-| Tocar una tarjeta de la lista | La cámara viaja a ese lugar y la tarjeta queda resaltada | ☐ |
-| Ir al más cercano | La cámara va al lugar verde; el botón está deshabilitado antes de buscar | ☐ |
+| Tocar un marcador | Se ve el nombre y la categoría del lugar | ☑ |
+| Lista de lugares | Ordenada de menor a mayor distancia, con m o km | ☑ |
+| Tocar una tarjeta de la lista | La cámara viaja a ese lugar y la tarjeta queda resaltada | ☑ |
+| Ir al más cercano | La cámara va al lugar verde; el botón está deshabilitado antes de buscar | ☑ |
 | Cambiar la ubicación y buscar otra vez | Las distancias, el orden y el lugar verde se actualizan | ☐ |
-| Ubicación apagada | Mensaje de GPS con *Reintentar* | ☐ |
+| Ubicación apagada | Mensaje de GPS con *Reintentar* | ☑ |
 | Rotar la pantalla | No se pierden la ubicación ni la lista | ☐ |
-| Revisar el repositorio | buscar la clave con `git grep` no encuentra nada y `local.properties` no está subido | ☐ |
+| Revisar el repositorio | buscar la clave con `git grep` no encuentra nada y `local.properties` no está subido | ☑ |
 
 ## Para pensar
 
