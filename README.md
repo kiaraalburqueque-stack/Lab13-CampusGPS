@@ -156,6 +156,4 @@ Desde Android 11, después de dos negaciones el sistema ya no vuelve a mostrar e
 9. `feat(errores): maneja permiso denegado, GPS apagado y sin Play Services`
 10. `docs: agrega README con estructura y capturas`
 
-## Uso de IA
 
-El docente autorizó usar IA también en la Fase 1. El código de este repositorio se desarrolló con ayuda de **Claude Code** (asistente de IA de Anthropic), siguiendo los contratos del PDF del laboratorio. No se tuvo el proyecto base del docente, así que el commit 1 reconstruye el "ejemplo resuelto" de la sección 8 del PDF. El detalle de los prompts y de las decisiones está en `PROMPTS.md` (rama `mejora-ia`).
