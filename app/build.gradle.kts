@@ -1,6 +1,14 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+}
+
+// Lee local.properties (si existe). Ese archivo está en .gitignore, así la clave nunca llega a GitHub.
+val localProps = Properties().apply {
+    val archivo = rootProject.file("local.properties")
+    if (archivo.exists()) archivo.inputStream().use { load(it) }
 }
 
 android {
@@ -17,6 +25,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // La clave llega al Manifest como ${MAPS_API_KEY}. Si aún no existe se usa un texto
+        // de relleno: el mapa sale gris, pero la app no se cierra por meta-data vacío.
+        manifestPlaceholders["MAPS_API_KEY"] =
+            localProps.getProperty("MAPS_API_KEY")?.takeIf { it.isNotBlank() } ?: "SIN_CLAVE"
     }
 
     buildTypes {
