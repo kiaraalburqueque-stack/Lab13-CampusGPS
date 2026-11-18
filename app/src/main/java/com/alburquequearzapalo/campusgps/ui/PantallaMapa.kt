@@ -12,12 +12,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -27,7 +29,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
@@ -50,6 +55,9 @@ fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
     val lugares by vm.lugaresVisibles.collectAsState()
     val categoria by vm.categoria.collectAsState()
+    val siguiendo by vm.siguiendo.collectAsState()
+    // Recuerda qué pidió el usuario mientras Android muestra el cuadro de permiso
+    var pidioSeguimiento by rememberSaveable { mutableStateOf(false) }
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
     val contexto = LocalContext.current
@@ -58,7 +66,11 @@ fun PantallaMapa(vm: MapaViewModel) {
     val lanzador = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { resultado ->
-        if (resultado.values.any { it }) vm.buscar() else vm.permisoDenegado()
+        when {
+            !resultado.values.any { it } -> vm.permisoDenegado()
+            pidioSeguimiento -> vm.iniciarSeguimiento()
+            else -> vm.buscar()
+        }
     }
 
     fun permisoConcedido() = PERMISOS.any {
@@ -66,7 +78,14 @@ fun PantallaMapa(vm: MapaViewModel) {
     }
 
     fun alPulsar() {
+        pidioSeguimiento = false
         if (permisoConcedido()) vm.buscar() else lanzador.launch(PERMISOS)
+    }
+
+    fun alPulsarSeguimiento() {
+        if (siguiendo) { vm.detenerSeguimiento(); return }
+        pidioSeguimiento = true
+        if (permisoConcedido()) vm.iniciarSeguimiento() else lanzador.launch(PERMISOS)
     }
 
     // Se vuelve a revisar cada vez que cambia el estado (por ejemplo, tras responder al permiso)
@@ -121,11 +140,17 @@ fun PantallaMapa(vm: MapaViewModel) {
                 Button(onClick = { alPulsar() }, enabled = estado !is UbicacionUi.Buscando) {
                     Text("Obtener mi ubicación")
                 }
-                OutlinedButton(
-                    onClick = { masCercano?.let { vm.seleccionar(it.id) } },
-                    enabled = masCercano != null
-                ) {
-                    Text("Ir al más cercano")
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = { masCercano?.let { vm.seleccionar(it.id) } },
+                        enabled = masCercano != null
+                    ) {
+                        Text("Ir al más cercano")
+                    }
+                    // Mejora IA: seguimiento en vivo con requestLocationUpdates
+                    FilledTonalButton(onClick = { alPulsarSeguimiento() }) {
+                        Text(if (siguiendo) "Detener seguimiento" else "Iniciar seguimiento")
+                    }
                 }
                 masCercano?.let { cercano ->
                     // Solo se formatea un valor ya calculado por el ViewModel

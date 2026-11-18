@@ -12,7 +12,11 @@ import com.alburquequearzapalo.campusgps.model.Posicion
 import com.alburquequearzapalo.campusgps.model.TipoError
 import com.alburquequearzapalo.campusgps.model.UbicacionUi
 import com.alburquequearzapalo.campusgps.util.distanciaMetros
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -57,7 +61,45 @@ class MapaViewModel(
         }
     }
 
+    // Mejora IA: seguimiento en vivo. El Job vive en viewModelScope, así sobrevive a la rotación
+    private val _siguiendo = MutableStateFlow(false)
+    val siguiendo: StateFlow<Boolean> = _siguiendo.asStateFlow()
+    private var trabajoSeguimiento: Job? = null
+
+    fun iniciarSeguimiento() {
+        if (_siguiendo.value) return
+        if (!ubicacionRepo.playServicesDisponible()) {
+            _estado.value = UbicacionUi.Error(
+                "Este dispositivo no tiene Google Play Services",
+                TipoError.SIN_PLAY_SERVICES
+            )
+            return
+        }
+        _siguiendo.value = true
+        if (_estado.value !is UbicacionUi.Lista) _estado.value = UbicacionUi.Buscando
+        trabajoSeguimiento = viewModelScope.launch {
+            ubicacionRepo.seguirPosicion()
+                .catch { _estado.value = errorDe(it) }
+                .onCompletion {
+                    // Solo apaga el indicador si este es el seguimiento vigente (evita carreras al reiniciar)
+                    val actual = currentCoroutineContext()[Job]
+                    if (trabajoSeguimiento == null || trabajoSeguimiento == actual) _siguiendo.value = false
+                }
+                .collect {
+                    _estado.value = UbicacionUi.Lista(it)
+                    actualizarDistancias(it)
+                }
+        }
+    }
+
+    fun detenerSeguimiento() {
+        trabajoSeguimiento?.cancel()
+        trabajoSeguimiento = null
+        _siguiendo.value = false
+    }
+
     fun permisoDenegado() {
+        detenerSeguimiento()
         _estado.value = UbicacionUi.Error(
             "Sin permiso de ubicación no puedo mostrar dónde estás",
             TipoError.SIN_PERMISO
