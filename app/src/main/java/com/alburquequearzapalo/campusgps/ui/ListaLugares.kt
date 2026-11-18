@@ -35,6 +35,7 @@ import com.alburquequearzapalo.campusgps.util.formatearDistancia
 fun ListaLugares(
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
+    masCercanoId: Int?,
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -47,7 +48,8 @@ fun ListaLugares(
             TarjetaLugar(
                 item = item,
                 esSeleccionado = item.lugar.id == seleccionado,
-                colorPunto = MaterialTheme.colorScheme.primary,
+                colorPunto = if (item.lugar.id == masCercanoId) Color(0xFF2E7D32)
+                else MaterialTheme.colorScheme.primary,
                 onClick = { onClick(item.lugar.id) }
             )
         }
