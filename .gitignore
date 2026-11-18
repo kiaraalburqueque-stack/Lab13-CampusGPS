@@ -1,0 +1,21 @@
+# Gradle / Android Studio
+.gradle/
+build/
+/app/build/
+.kotlin/
+captures/
+.externalNativeBuild/
+.cxx/
+*.iml
+.idea/
+.DS_Store
+
+# Configuracion local y secretos (NO subir)
+local.properties
+secrets.properties
+*.keystore
+*.jks
+google-services.json
+
+# Logs
+*.log
